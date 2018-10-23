@@ -186,7 +186,7 @@ public class GameServer implements GameProtocol {
 					}*/
 					// move given dist
 					Vector3 moveDist = move.getMoveDist();
-					client.moveInput(moveDist.x, moveDist.y);
+					client.moveInput(moveDist.x, moveDist.y, move.delta);
 					// compare against given end pos
 					/*if(move.endPos.variesFrom(client)) {
 						connection.sendTCP(new PositionUpdate(client));

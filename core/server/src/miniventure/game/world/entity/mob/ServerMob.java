@@ -35,10 +35,10 @@ import org.jetbrains.annotations.Nullable;
  */
 public abstract class ServerMob extends ServerEntity implements Mob {
 	
-	private static final float HURT_COOLDOWN = 0.5f; // minimum time between taking damage, in seconds; prevents a mob from getting hurt multiple times in quick succession. 
+	private static final float HURT_COOLDOWN = 0.5f; // minimum time between taking damage, in seconds; prevents a mob from getting hurt multiple times in quick succession.
 	
-	private static final float FRICTION = 1f; // slowness in tiles per second.
-	private Vector2 vel = new Vector2(), acc = new Vector2();
+	private static final float SPEED = .1f;
+	private Vector2 vel = new Vector2(), targetVel = new Vector2();
 	
 	@NotNull private Direction dir;
 	@NotNull private MobAnimationController animator;
@@ -100,7 +100,7 @@ public abstract class ServerMob extends ServerEntity implements Mob {
 	public void reset() {
 		dir = Direction.DOWN;
 		vel.setZero();
-		acc.setZero();
+		targetVel.setZero();
 		this.health = maxHealth;
 		knockbackController.reset();
 		invulnerableTime = 0;
@@ -131,12 +131,22 @@ public abstract class ServerMob extends ServerEntity implements Mob {
 			updateSprite(newSprite);
 		
 		knockbackController.update(delta);
-		vel.add(acc);
-		acc.setZero();
-		Vector2 friction = vel.cpy().scl(delta);
-		friction.setLength(Math.min(friction.len(), FRICTION));
-		vel.sub(friction);
-		if(move(vel.cpy().scl(delta)) && this instanceof ServerPlayer)
+		
+		/*
+			so we have a current velocity, and a target velocity.
+			move the current velocity toward the target velocity by a certain amount each frame.
+			
+		 */
+		targetVel.setLength(Math.min(1, targetVel.len()));
+		// if(this instanceof ServerPlayer) System.out.println("target: "+targetVel);
+		Vector2 diff = targetVel.cpy().sub(vel);
+		// if(this instanceof ServerPlayer) System.out.println("diff="+diff);
+		targetVel.setZero();
+		diff.setLength(Math.min(SPEED, diff.len()));
+		// if(this instanceof ServerPlayer) System.out.println("newdiff="+diff);
+		vel.add(diff);
+		// if(this instanceof ServerPlayer) System.out.println("vel="+vel);
+		if(move(vel.cpy().scl(SPEED)) && this instanceof ServerPlayer)
 			ServerCore.getServer().sendToPlayer((ServerPlayer)this, new PositionUpdate(this));
 		
 		super.update(delta);
@@ -151,9 +161,12 @@ public abstract class ServerMob extends ServerEntity implements Mob {
 		return bounds;
 	}
 	
-	public void moveInput(Vector2 v) { moveInput(v.x, v.y); }
-	public void moveInput(float x, float y) {
-		acc.add(x, y);
+	public void moveInput(Vector2 v, float delta) { moveInput(v.x, v.y, delta); }
+	public void moveInput(float x, float y, float delta) {
+		// we have a requested movement, and the delta over which it was requested.
+		// with this, we can set the target velocity to be xy over the delta.
+		// that way the delta will not come into play in the update method.
+		targetVel.set(x/delta, y/delta);
 	}
 	
 	@Override

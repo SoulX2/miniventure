@@ -378,18 +378,20 @@ public interface GameProtocol {
 	
 	class MovementRequest {
 		public final PositionUpdate startPos; // where the player was before movement. The server will update to this as long as it is a valid position.
+		public final float delta;
 		public final float xd, yd, zd; // this is useful to the server because it can do things like getting hurt by touching something that the player can't actually run into.
 		public final PositionUpdate endPos; // where the player ended up after movement. If this doesn't match where the server thinks the player should have ended up, it will end back a position update to correct it.
 		
-		private MovementRequest() { this(null, 0, 0, 0, null); }
-		public MovementRequest(PositionUpdate startPos, Vector2 moveDist, PositionUpdate endPos) { this(startPos, moveDist.x, moveDist.y, 0, endPos); }
-		public MovementRequest(PositionUpdate startPos, Vector3 moveDist, PositionUpdate endPos) { this(startPos, moveDist.x, moveDist.y, moveDist.z, endPos); }
-		public MovementRequest(PositionUpdate startPos, float xd, float yd, float zd, PositionUpdate endPos) {
+		private MovementRequest() { this(null, 0, 0, 0, 0, null); }
+		// public MovementRequest(PositionUpdate startPos, Vector2 moveDist, PositionUpdate endPos) { this(startPos, moveDist.x, moveDist.y, 0, endPos); }
+		// public MovementRequest(PositionUpdate startPos, Vector3 moveDist, PositionUpdate endPos) { this(startPos, moveDist.x, moveDist.y, moveDist.z, endPos); }
+		public MovementRequest(PositionUpdate startPos, float xd, float yd, float zd, float delta, PositionUpdate endPos) {
 			//System.out.println("made movement request, starting "+);
 			this.startPos = startPos;
 			this.xd = xd;
 			this.yd = yd;
 			this.zd = zd;
+			this.delta = delta;
 			this.endPos = endPos;
 		}
 		

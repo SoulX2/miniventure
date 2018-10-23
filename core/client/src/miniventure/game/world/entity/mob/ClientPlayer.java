@@ -147,14 +147,14 @@ public class ClientPlayer extends ClientEntity implements Player {
 				dir = newDir;
 		}
 		
-		Vector2 moveDist = inputDir.cpy().scl(moveSpeed*GameCore.getDeltaTime());
+		Vector2 moveDist = inputDir.cpy().scl(moveSpeed);
 		Tile closest = getClosestTile();
 		if(closest != null)
 			moveDist.scl(closest.getType().getPropertyOrDefault(PropertyTag.SpeedRatio, 1f));
 		
 		//float elapTime = GameCore.getElapsedProgramTime();
 		if(!moveDist.isZero()) {
-			move(moveDist, getLevel() != null);
+			ClientCore.getClient().send(new MovementRequest(new PositionUpdate(this), moveDist.x, moveDist.y, 0, GameCore.getDeltaTime(), new PositionUpdate(this)));
 			
 			animator.requestState(AnimationState.WALK);
 			
@@ -209,7 +209,7 @@ public class ClientPlayer extends ClientEntity implements Player {
 		
 		boolean moved = false;//super.move(xd, yd, zd, validate);
 		
-		ClientCore.getClient().send(new MovementRequest(prevPos, xd, yd, zd, new PositionUpdate(this)));
+		// ClientCore.getClient().send(new MovementRequest(prevPos, xd, yd, zd, new PositionUpdate(this)));
 		
 		return moved;
 	}
