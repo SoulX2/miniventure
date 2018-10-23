@@ -207,7 +207,7 @@ public class ClientPlayer extends ClientEntity implements Player {
 		
 		PositionUpdate prevPos = new PositionUpdate(this);
 		
-		boolean moved = super.move(xd, yd, zd, validate);
+		boolean moved = false;//super.move(xd, yd, zd, validate);
 		
 		ClientCore.getClient().send(new MovementRequest(prevPos, xd, yd, zd, new PositionUpdate(this)));
 		

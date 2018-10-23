@@ -85,7 +85,7 @@ public class MobAi extends ServerMob {
 		if(tempTimeLeft <= 0 && tempMovePattern != null)
 			tempMovePattern = null;
 		
-		move(curMovePattern().move(delta, this));
+		moveInput(curMovePattern().move(delta, this));
 	}
 	
 	@Override

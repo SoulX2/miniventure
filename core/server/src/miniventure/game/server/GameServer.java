@@ -178,19 +178,19 @@ public class GameServer implements GameProtocol {
 				
 				forPacket(object, MovementRequest.class, move -> {
 					Vector3 loc = client.getLocation();
-					if(move.getMoveDist().len() < 1 && !move.startPos.variesFrom(client)) {
+					/*if(move.getMoveDist().len() < 1 && !move.startPos.variesFrom(client)) {
 						// move to start pos
 						Vector3 start = move.startPos.getPos();
 						Vector3 diff = loc.cpy().sub(start);
 						client.move(diff);
-					}
+					}*/
 					// move given dist
 					Vector3 moveDist = move.getMoveDist();
-					client.move(moveDist);
+					client.moveInput(moveDist.x, moveDist.y);
 					// compare against given end pos
-					if(move.endPos.variesFrom(client)) {
+					/*if(move.endPos.variesFrom(client)) {
 						connection.sendTCP(new PositionUpdate(client));
-					}
+					}*/
 					// note that the server will always have the say when it comes to which level the player should be on.
 				});
 				

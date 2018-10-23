@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.EnumMap;
 
 import miniventure.game.GameProtocol.InventoryUpdate;
+import miniventure.game.GameProtocol.PositionUpdate;
 import miniventure.game.GameProtocol.StatUpdate;
 import miniventure.game.item.Hands;
 import miniventure.game.item.Inventory;

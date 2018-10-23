@@ -5,6 +5,7 @@ import java.util.Arrays;
 
 import miniventure.game.GameProtocol.Hurt;
 import miniventure.game.GameProtocol.MobUpdate;
+import miniventure.game.GameProtocol.PositionUpdate;
 import miniventure.game.GameProtocol.SpriteUpdate;
 import miniventure.game.item.Item;
 import miniventure.game.item.ToolItem;
@@ -24,6 +25,7 @@ import miniventure.game.world.tile.TileType.TileTypeEnum;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -34,6 +36,9 @@ import org.jetbrains.annotations.Nullable;
 public abstract class ServerMob extends ServerEntity implements Mob {
 	
 	private static final float HURT_COOLDOWN = 0.5f; // minimum time between taking damage, in seconds; prevents a mob from getting hurt multiple times in quick succession. 
+	
+	private static final float FRICTION = 1f; // slowness in tiles per second.
+	private Vector2 vel = new Vector2(), acc = new Vector2();
 	
 	@NotNull private Direction dir;
 	@NotNull private MobAnimationController animator;
@@ -94,6 +99,8 @@ public abstract class ServerMob extends ServerEntity implements Mob {
 	
 	public void reset() {
 		dir = Direction.DOWN;
+		vel.setZero();
+		acc.setZero();
 		this.health = maxHealth;
 		knockbackController.reset();
 		invulnerableTime = 0;
@@ -124,6 +131,13 @@ public abstract class ServerMob extends ServerEntity implements Mob {
 			updateSprite(newSprite);
 		
 		knockbackController.update(delta);
+		vel.add(acc);
+		acc.setZero();
+		Vector2 friction = vel.cpy().scl(delta);
+		friction.setLength(Math.min(friction.len(), FRICTION));
+		vel.sub(friction);
+		if(move(vel.cpy().scl(delta)) && this instanceof ServerPlayer)
+			ServerCore.getServer().sendToPlayer((ServerPlayer)this, new PositionUpdate(this));
 		
 		super.update(delta);
 		
@@ -135,6 +149,11 @@ public abstract class ServerMob extends ServerEntity implements Mob {
 		Rectangle bounds = super.getBounds();
 		bounds.setHeight(Mob.shortenSprite(bounds.getHeight()));
 		return bounds;
+	}
+	
+	public void moveInput(Vector2 v) { moveInput(v.x, v.y); }
+	public void moveInput(float x, float y) {
+		acc.add(x, y);
 	}
 	
 	@Override
